@@ -1,0 +1,177 @@
+(ns) toplevel
+
+(imp) compass.txt
+
+(tfsc) 
+    compass.compass  compass_y    
+    0.1     0.5     0.1
+
+(tfrotdz) compass_y compass_x -90
+
+(nm) compass 2
+    compass_x
+    compass_y
+
+(gcyl)
+    innertreadfront
+    17
+    0.15
+    0.10
+
+(tfrotdz)
+    innertreadfront
+    innertreadfront
+    90
+
+(tfxlat)
+    innertreadfront
+    innertreadfront
+    0.0
+    0.0
+    0.25
+
+(tfxlat)
+    innertreadfront
+    innertreadback
+    0.0
+    0.0
+    -0.5
+
+(nm) tread 2
+    innertreadfront
+    innertreadback
+
+(tfxlat)
+    tread
+    left_tread
+    0.25
+    0.0
+    0.0
+
+(tfrotdy)
+    left_tread
+    right_tread
+    180
+
+(imp) box.txt
+
+(tfsc)
+    box.box
+    tank_lower_body
+    0.25
+    0.15
+    0.7
+
+(tfsc)
+    tank_lower_body
+    tank_upper_body
+    0.75
+    1.5
+    0.3
+
+(tfxlat)
+    tank_upper_body
+    tank_upper_body
+    0.0
+    0.15
+    -0.15
+
+(gcyl)
+    left_turret
+    8
+    0.1
+    2
+
+(tfrotdx)
+    left_turret
+    left_turret
+    90
+
+(tfsc)
+    left_turret
+    left_turret
+    0.2
+    0.2
+    0.2
+
+(tfxlat)
+    left_turret
+    left_turret
+    0.06
+    0.2
+    -0.2
+
+(tfxlat)
+    left_turret
+    right_turret
+    -0.12
+    0.0
+    0.0
+
+(gcirc)
+    platform
+    5
+    1.0
+
+(nm) tank 6
+    left_tread
+    right_tread
+    tank_lower_body
+    tank_upper_body
+    left_turret
+    right_turret
+
+(exm) toplevel tank
+
+(tfxlat)
+    tank
+    tank
+    0.0
+    0.15
+    0.0
+
+(nm) tank 3
+    tank
+    platform
+    compass
+
+(tfxlat) 
+    tank 
+    tank_left
+    0.7
+    0.0
+    0.0
+
+(tfxlat) 
+    tank 
+    tank_right
+    -0.7
+    0.0
+    0.0
+
+(nm) tank_row 3
+    tank
+    tank_left
+    tank_right
+
+(tfxlat)
+    tank_row
+    tank_front_row
+    0.0
+    0.0
+    1.0
+
+(tfxlat)
+    tank_row
+    tank_back_row
+    0.0
+    0.0
+    -1.0
+
+(nm) group 4
+    tank_front_row
+    tank_row
+    tank_back_row
+    compass.compass
+
+(exm) toplevel group

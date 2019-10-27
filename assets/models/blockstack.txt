@@ -1,0 +1,61 @@
+(imp) box.txt
+(ns) toplevel
+
+(tfsc)
+    box.box
+    center
+    0.6
+    0.6
+    0.6
+
+(tfxlat)
+    box.box
+    xaxis
+    0.5
+    0.0
+    0.0    
+
+(tfxlat)
+    box.box
+    yaxis
+    0.0
+    0.5
+    0.0
+
+(tfxlat)
+    box.box
+    zaxis
+    0.0
+    0.0
+    0.5
+
+<** scale the boxes along their respective axes **>
+(tfsc)
+    xaxis
+    xaxis
+    3.0
+    0.05
+    0.05
+
+(tfsc)
+    yaxis
+    yaxis
+    0.05
+    3.0
+    0.05
+
+(tfsc)
+    zaxis
+    zaxis
+    0.05
+    0.05
+    3.0
+
+(nm) toplevel 4
+    center
+    xaxis
+    yaxis
+    zaxis
+
+(exm) toplevel
+    toplevel

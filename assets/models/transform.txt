@@ -1,0 +1,74 @@
+<** 
+    namespaces created in pyramid.txt are imported as is.
+    in this case, everything from pyramid.txt is in 
+    the 'model' namespace
+    (imp) pyramid.txt
+**>
+
+<**
+    transformations can be applied to existing models. this 
+    can optionally overwrite an existing model but make sure 
+    you dont shoot yourself in the foot by overwriting a 
+    model you will need in the future
+
+    translation:    (tfxlat) inputmodel outputmodel x y z
+
+    rotate in rads: (tfrotx)  inputmodel outputmodel theta
+    rotate in rads: (tfroty)  inputmodel outputmodel theta
+    rotate in rads: (tfrotz)  inputmodel outputmodel theta
+
+    rotate in rads: (tfrotdx)  inputmodel outputmodel theta
+    rotate in rads: (tfrotdy)  inputmodel outputmodel theta
+    rotate in rads: (tfrotdz)  inputmodel outputmodel theta
+
+    scaling:        (tfsc)   inputmodel outputmodel x y z
+**>
+
+(imp) superpyramid.txt
+(ns) tf
+
+<** rotate about x axis **>
+(tfrotdx) 
+    models.pyramid 
+    pyr_zaxis
+    90.0
+
+(tfrotdz)
+    pyr_zaxis
+    pyr_zaxis_rot
+    45.0
+
+<** rotate about z axis **>
+(tfrotdz)
+    models.pyramid
+    pyr_xaxis
+    90.0
+
+(tfrotdx)
+    pyr_xaxis
+    pyr_xaxis_rot
+    45.0
+
+<** rotate about one axis **>
+(tfrotdy)
+    models.pyramid
+    pyr_side
+    45.0
+
+(nm) overall_obj 6
+    models.pyramid
+    pyr_zaxis
+    pyr_zaxis_rot
+    pyr_xaxis
+    pyr_xaxis_rot
+    pyr_side
+
+<**
+(tfxlat) 
+    overall_obj
+    overall_obj
+    5 0 0
+**>
+
+(exrn) tf overall_obj pyramid
+

@@ -1,0 +1,49 @@
+(ns) toplevel
+
+(gcyl) 
+    lenz
+    4
+    0.025
+    1
+
+(tfrotdx)
+    lenz 
+    lenz
+    90
+
+(tfxlat)
+    lenz
+    lenz
+    -0.5
+    0.0
+    -0.5
+
+(tfxlat)
+    lenz 
+    lenzo
+    1.0
+    0.0
+    0.0
+
+(nm) sel 2
+    lenz
+    lenzo
+
+(tfrotdy)
+    sel
+    selo
+    90
+
+(nm) selector 2
+    sel
+    selo
+
+(tfxlat)
+    selector
+    selector
+    0.0
+    0.15
+    0.0
+
+(exm) toplevel selector
+

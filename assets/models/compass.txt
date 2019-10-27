@@ -1,0 +1,30 @@
+(ns) compass
+
+(gcyl)
+    compassyaxis
+    10
+    0.01
+    2.0
+
+(tfrotdx)
+    compassyaxis
+    compasszaxis
+    90
+
+(tfrotdz)
+    compassyaxis
+    compassxaxis
+    90
+
+(nm) 
+    compass
+    3
+    compassxaxis
+    compassyaxis
+    compasszaxis
+
+(exm) 
+    compass 
+    compass
+
+

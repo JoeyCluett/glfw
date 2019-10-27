@@ -1,0 +1,57 @@
+(ns) box
+
+(nv) br   1  -1  1
+(nv) bl  -1  -1  1
+(nv) tl  -1  -1 -1
+(nv) tr   1  -1 -1
+
+(nt) plane_a br bl tr
+(nt) plane_b bl tr tl
+
+(nm) plane_bottom 2
+    plane_a
+    plane_b
+
+(tfrotdz)
+    plane_bottom
+    plane_top
+    180.0
+
+(tfrotdz)
+    plane_bottom
+    plane_left
+    -90.0
+
+(tfrotdz)
+    plane_bottom
+    plane_right
+    90.0
+
+(tfrotdx)
+    plane_bottom
+    plane_front
+    -90.0
+
+(tfrotdx)
+    plane_bottom
+    plane_back
+    90.0
+
+(nm) box 6
+    plane_bottom
+    plane_top
+    plane_left
+    plane_right
+    plane_front
+    plane_back
+
+<** scale the box so it is a 'unit box' **>
+(tfsc)
+    box
+    box
+    0.5
+    0.5
+    0.5
+
+(exm) box box
+

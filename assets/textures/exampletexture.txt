@@ -1,0 +1,12 @@
+ROWS    2
+COLUMNS 2
+
+<** 
+    data is organized in rows starting with 
+    row 0 every color is an RGB set seperated 
+    by spaces 
+**>
+
+255 0 0         0 255 0
+0 0 255         255 255 255
+

@@ -1,0 +1,42 @@
+(ns) toplevel
+
+(gcyl) disk 8 0.5 0.04
+(tfxlat) disk disk 0.0 -0.02 0.0
+
+(tfrotdz) disk diskz 90
+(tfrotdx) disk diskx 90
+
+(imp) box.txt
+
+(tfsc) box.box crossbar 0.08 1.2 0.08
+(tfrotdx) crossbar crossbar 45
+(tfrotdy) crossbar crossbar1 45
+(tfrotdy) crossbar crossbar2 -45
+(tfrotdy) crossbar crossbar3 135
+(tfrotdy) crossbar crossbar4 -135
+
+(nm) crossbarT 4
+    crossbar1
+    crossbar2
+    crossbar3
+    crossbar4
+
+(nm) mine 4
+    disk
+    diskz
+    diskx
+    crossbarT
+
+(tfsc)
+    mine mine
+    0.25
+    0.25
+    0.25
+
+(tfxlat)
+    mine mine
+    0.0
+    0.1
+    0.0
+
+(exm) toplevel mine

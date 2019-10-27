@@ -1,0 +1,25 @@
+<**
+
+    simple pyramid model that is 2 units wide, 2 units long, and 2 units tall
+
+**>
+(ns) models
+
+(nv) br   1  0  1
+(nv) bl  -1  0  1
+(nv) tl  -1  0 -1
+(nv) tr   1  0 -1
+(nv) top  0  2  0
+
+(nt) SOUTHFACE bl br top
+(nt) EASTFACE  br tr top
+(nt) NORTHFACE tr tl top
+(nt) WESTFACE  tl bl top
+
+(nm) pyramid 4
+  SOUTHFACE
+  EASTFACE
+  NORTHFACE
+  WESTFACE
+
+(exm) models pyramid

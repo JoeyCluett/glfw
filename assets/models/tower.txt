@@ -1,0 +1,62 @@
+(ns) toplevel
+
+(imp) compass.txt
+
+(gcyl)
+    cyl
+    14
+    0.35
+    0.4
+
+(tfsc)
+    cyl
+    cyl2
+    0.75
+    2
+    0.75
+
+(tfsc)
+    cyl
+    cyl3
+    0.5
+    3
+    0.5
+
+(nm) tow 3
+    cyl
+    cyl2
+    cyl3
+
+(tfsc)
+    tow
+    tow
+    0.7
+    0.7
+    0.7
+
+(tfrotdx)
+    tow
+    tow
+    45
+
+(tfxlat)
+    tow
+    tow
+    0.0
+    0.5
+    0.0
+
+(gcyl)
+    base
+    4
+    0.4
+    0.5
+
+(nm)
+    tower
+    2
+    tow
+    base
+
+(exm) toplevel tower
+

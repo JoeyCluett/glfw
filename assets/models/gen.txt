@@ -1,0 +1,41 @@
+(ns) gen
+
+
+<** 
+    generate types of shapes
+    cylinder is centered at the origin
+    circle lies on the xz plane
+
+    cylinder
+    (gcyl) outputname numpoints radius height
+
+    circle
+    (gcirc) outputname numpoints radius
+
+**>
+
+(gcirc)
+    circle
+    40
+    3
+
+(gcyl)
+    cylinder
+    3
+    1.0
+    2.0
+
+(tfrotdx)
+    cylinder
+    cylinder
+    90.0
+
+(tfxlat)
+    cylinder
+    cylinder
+    0.0     0.0     -1.0
+
+(exm) gen circle
+(exm) gen cylinder
+
+

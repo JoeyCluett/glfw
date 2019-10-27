@@ -1,0 +1,34 @@
+(ns) models
+
+(nv) br   1  -2  1
+(nv) bl  -1  -2  1
+(nv) tl  -1  -2 -1
+(nv) tr   1  -2 -1
+(nv) top  0  0  0
+
+(nt) SOUTHFACE bl br top
+(nt) EASTFACE  br tr top
+(nt) NORTHFACE tr tl top
+(nt) WESTFACE  tl bl top
+
+(nv) ubr   1  2  1
+(nv) ubl  -1  2  1
+(nv) utl  -1  2 -1
+(nv) utr   1  2 -1
+
+(nt) uSOUTHFACE ubl ubr top
+(nt) uEASTFACE  ubr utr top
+(nt) uNORTHFACE utr utl top
+(nt) uWESTFACE  utl ubl top
+
+(nm) pyramid 8
+  SOUTHFACE
+  EASTFACE
+  NORTHFACE
+  WESTFACE
+  uSOUTHFACE
+  uEASTFACE
+  uNORTHFACE
+  uWESTFACE
+
+(exm) models pyramid
