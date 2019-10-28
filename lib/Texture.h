@@ -15,9 +15,7 @@ const int TEXTURE_CUSTOM_TXT = 0;
 
 class Texture {
 private:
-
-    std::vector<uint8_t> image_data;
-    GLuint texture_unit_id;
+    GLuint texture_unit; // always GL_TEXTURE0 + some constant
     GLuint texture_id;
 
 public:
@@ -28,7 +26,12 @@ public:
 private:
 
     // use custom txt format for describing image data
-    void loadCustomTextureType(const std::string& filename, GLuint texture_unit) {
+    void loadCustomTextureType(
+            const std::string& filename, 
+            GLuint texture_unit, 
+            GLuint texture_wrap, 
+            GLuint texture_minmag) {
+        
         std::ifstream is(filename);
         
         // remove all of the comments from the input file
@@ -57,7 +60,8 @@ private:
 
         is.close();
         is.open("/tmp/texture-file.txt");
-
+        std::vector<uint8_t> image_data;
+        
         {
             int rows, columns;
 
@@ -90,13 +94,12 @@ private:
 
         glGenTextures(1, &this->texture_id);
         glBindTexture(GL_TEXTURE_2D, this->texture_id);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 1 byte alignment
         
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_minmag);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_minmag);
         
         // give this data to OpenGL
         glTexImage2D(
@@ -121,17 +124,34 @@ private:
 
 public:
 
-    Texture(const std::string& filename, const int filetype, GLuint texture_unit_id) {
+    Texture(
+            const std::string& filename, 
+            const int filetype, 
+            GLuint texture_unit_id, 
+            GLuint texture_wrap, 
+            GLuint texture_minmag) {
+
         if(filetype == TEXTURE_CUSTOM_TXT) {
-            this->loadCustomTextureType(filename, texture_unit_id);
+            this->loadCustomTextureType(filename, texture_unit_id, texture_wrap, texture_minmag);
         }
         else {
             throw std::runtime_error("Texture : Unsupported filetype");
         }
     }
 
-    uint8_t* data(void) {
-        return this->image_data.data();
+    Texture(
+            std::vector<uint8_t>& texture_data, 
+            int height,
+            int width,
+            GLuint texture_unit, 
+            GLuint texture_wrap, 
+            GLuint texture_minmag) {
+
+        this->height = height;
+        this->width  = width;
+
+
+
     }
 
     GLuint getTextureUnit(void) {

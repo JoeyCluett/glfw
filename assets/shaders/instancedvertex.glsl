@@ -14,7 +14,7 @@ void main() {
     // calculate the color of this vertex
     float mod_result = mod( gl_VertexID, 3 );
     if(mod_result < 0.1) {                          fragmentColor = vec3( 0.0, 0.0, 0.0 ); }
-    else if(mod_result > 0.9 && mod_result < 1.1) { fragmentColor = vec3( 0.5, 0.0, 0.0 ); }
-    else {                                          fragmentColor = vec3( 1.0, 0.0, 0.0 ); }
+    else if(mod_result > 0.9 && mod_result < 1.1) { fragmentColor = vec3( 0.0, 0.0, 0.5 ); }
+    else {                                          fragmentColor = vec3( 0.0, 0.0, 1.0 ); }
 
 }

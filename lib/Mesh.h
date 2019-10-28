@@ -16,6 +16,11 @@
 #include <iostream>
 #include <string>
 
+#include "./Shader.h"
+#include "./SimpleModel.h"
+#include "./Texture.h"
+#include "./IndexedModel.h"
+
 constexpr struct {
     
     const int STATIC = 0;

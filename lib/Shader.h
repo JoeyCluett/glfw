@@ -51,6 +51,21 @@ public:
             );
     }
 
+    Shader(std::string shadername) {
+        this->programid = 
+            LINK_SHADERS(
+                CREATE_SHADER(
+                    GL_VERTEX_SHADER, 
+                    Shader::vertex_shader_dir + shadername + ".vertex.glsl"), 
+                
+                CREATE_SHADER(
+                    GL_FRAGMENT_SHADER, 
+                    Shader::fragment_shader_dir + shadername + ".fragment.glsl"), 
+                
+                GL_TRUE
+            );
+    }
+
     static void setVertexShaderDirectory(std::string shader_loc) {
         Shader::vertex_shader_dir = shader_loc;
     }

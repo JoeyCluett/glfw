@@ -42,6 +42,7 @@ public:
 
     static void setFileLocation(std::string loc);
     static auto calculateNormals(std::vector<float>& v) -> std::vector<float>;
+    static auto loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelInfo;
 
     // constructor user will use. other constructor is used internally 
     // to create other ModelParser objects when importing files
@@ -81,7 +82,7 @@ public:
 
 };
 
-// initialize static data member
+// initialize static data member to current directory
 std::string ModelParser::model_loc = "./";
 
 ModelParser::ModelParser(std::string filename) {
@@ -227,6 +228,17 @@ auto ModelParser::loadExportedModelIntoRuntime(const std::string& modelname) -> 
 
     return mi;
 
+}
+
+auto ModelParser::loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelInfo {
+
+    ModelInfo mi;
+    glGenBuffers(1, &mi.buffer_id);
+    glBindBuffer(GL_ARRAY_BUFFER, mi.buffer_id);
+    glBufferData(GL_ARRAY_BUFFER, v.size() * 4, v.data(), GL_STATIC_DRAW);
+
+    mi.vertices = v.size() / 3;
+    return mi;
 }
 
 auto ModelParser::getModelData(const std::string& modelname) -> 

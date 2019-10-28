@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-//#include "main.h"
 #include "../lib/Initialization.h"
 #include "../lib/Shader.h"
 #include "../lib/SimpleModel.h"
@@ -24,11 +23,6 @@ const int GRIDWIDTH  = 20;
 
 int main(int argc, char* argv[]) {
 
-    //if(argc != 3) {
-    //    cout << "specify a file and a top-level entity\n";
-    //    return 1;
-    //}
-
     cout << "Creating window...\n" << flush;
     auto window = GLFWINITWINDOW(WIDTH, HEIGHT, "Hello World", {3, 3}, 4, true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -36,9 +30,7 @@ int main(int argc, char* argv[]) {
     cout << "DONE\n" << flush;
     
     FloatCam camera({ 2.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
-    //camera.setOrientation(M_PI, 0.0f);
     camera.setBounds({ -1.0f, 1.0f, -1.0f }, { 20.0f, 20.0f, 20.0f });
-    camera.setLookAt({ 0.0f, 0.0f, 0.0f });
 
     glfwSetKeyCallback(
         window, 
@@ -52,7 +44,7 @@ int main(int argc, char* argv[]) {
         }
     );
 
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
 
@@ -131,12 +123,42 @@ int main(int argc, char* argv[]) {
     // generate and load a 20x20 texture
     vector<uint8_t> texture_data;
     srand(time(NULL));
+    uint8_t browns[] = {
+        161, 64, 5,  // 0
+        145, 41, 3,  // 1
+        117, 26, 3,  // 2
+        97,  26, 9,  // 3
+        102, 27, 4,  // 4
+        51,  16, 8,  // 5
+        77,  31, 10, // 6
+        37,  14, 3,  // 7
+        46,  16, 3,  // 8
+        135, 64, 8,  // 9
+        133, 60, 8,  // 10
+        122, 49, 7,  // 11
+        87,  45, 9,  // 12 last brown
+        120, 102, 47, // 13
+        125, 102, 24, // 14
+        94,  89,  25, // 15
+        64,  69,  25, // 16
+        89,  80,  19, // 17
+        110, 81,  22, // 18
+        74,  63,  21, // 19
+        78,  62,  21, // 20
+        158, 149, 56, // 21
+        176, 189, 72, // 22
+        166, 200, 64, // 23
+        179, 213, 34, // 24
+    };
     for(int i = 0; i < GRIDHEIGHT*GRIDWIDTH; i++) {
         //texture_data.push_back(rand() % 256); // r
         //texture_data.push_back(rand() % 256); // g
         //texture_data.push_back(rand() % 256); // b
     
-        texture_data.insert(texture_data.end(), { 0, (unsigned char)((rand() & 127)+128), 0 });
+        //texture_data.insert(texture_data.end(), { 0, (unsigned char)((rand() & 127)+128), 0 });
+
+        int ind = (rand() % 13) * 3;
+        texture_data.insert(texture_data.end(), { browns[ind+0], browns[ind+1], browns[ind+2] });
 
     }
 
@@ -158,12 +180,16 @@ int main(int argc, char* argv[]) {
 
     vector<GLfloat> texture_coords = {
         0.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 0.0f,
+        0.0f, GRIDHEIGHT, //1.0f,
+        GRIDWIDTH, 0.0f, //1.0f, 0.0f,
 
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f     
+        GRIDWIDTH, 0.0f,
+        GRIDWIDTH, GRIDHEIGHT,
+        0.0f,      GRIDHEIGHT
+
+        //1.0f, 0.0f,
+        //1.0f, 1.0f,
+        //0.0f, 1.0f     
     };
 
     GLuint texture_id;
@@ -175,7 +201,7 @@ int main(int argc, char* argv[]) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // load the texture data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 20, 20, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GRIDWIDTH, GRIDHEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data.data());
     glGenerateMipmap(GL_TEXTURE_2D);
 
     // load the texture vertex data
