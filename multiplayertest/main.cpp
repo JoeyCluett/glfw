@@ -21,7 +21,7 @@ const int WIDTH  = 800;
 const int HEIGHT = 600;
 
 const int GRIDHEIGHT = 50;
-const int GRIDWIDTH  = 30;
+const int GRIDWIDTH  = 50;
 
 const int TEXTUREHEIGHT = 32;
 const int TEXTUREWIDTH  = 32;
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     cout << "DONE\n" << flush;
     
     FloatCam camera({ 2.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
-    camera.setBounds({ -1.0f, 1.0f, -1.0f }, { 20.0f, 20.0f, 30.0f });
+    camera.setBounds({ -1.0f, 1.0f, -1.0f }, { GRIDWIDTH, 20.0f, GRIDHEIGHT });
 
     glfwSetKeyCallback(
         window, 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
         // create and load the grid array data
         {
 
-            auto grid_vertices = ::generate_grid(20, 30);
+            auto grid_vertices = ::generate_grid(GRIDWIDTH, GRIDHEIGHT);
 
             for(int i = 0; i < (int)grid_vertices.size(); i += 3) {
                 grid_vertices[i+0] -= 0.5f;
@@ -251,7 +251,7 @@ int main(int argc, char* argv[]) {
     auto blackshaderins = blackshader.registerUniform("instance_tf", instance_tf);
 
     vector<glm::vec3> tf_vector;
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < GRIDWIDTH; i++) {
         for(int j = 0; j < 20; j++) {
 
             if((j+i) % 2 && j > 4 && j < 7)
@@ -261,7 +261,7 @@ int main(int argc, char* argv[]) {
     }
 
     vector<glm::vec3> tf_vector_truck;
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < GRIDWIDTH; i++) {
         for(int j = 0; j < 20; j++) {
 
             if((j == 4 || j == 3) && !((i+j+1)%2))
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
     }
 
     vector<glm::vec3> tf_vector_tower;
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < GRIDWIDTH; i++) {
         for(int j = 0; j < 20; j++) {
 
             if(j == 0 && i%2)
