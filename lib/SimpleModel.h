@@ -20,8 +20,21 @@ typedef std::array<vertex_t, 3> tri_t;
 typedef std::vector<tri_t>      model_t;
 
 struct ModelInfo {
+
     GLuint buffer_id;
     int vertices;
+
+    friend std::ostream& operator<<(std::ostream& os, ModelInfo& mi) {
+        os << mi.buffer_id << ' ' << mi.vertices;
+        return os;
+    }
+
+};
+
+struct ModelImportInfo {
+    std::string filename;
+    std::string modelname;
+    ModelInfo* mi_ptr;
 };
 
 class ModelParser {
@@ -43,6 +56,7 @@ public:
     static void setFileLocation(std::string loc);
     static auto calculateNormals(std::vector<float>& v) -> std::vector<float>;
     static auto loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelInfo;
+    static void loadModelList(std::vector<ModelImportInfo> miov);
 
     // constructor user will use. other constructor is used internally 
     // to create other ModelParser objects when importing files
@@ -220,11 +234,16 @@ auto ModelParser::loadExportedModelIntoRuntime(const std::string& modelname) -> 
     }
 
     ModelInfo mi;
-    glGenBuffers(1, &mi.buffer_id);
-    glBindBuffer(GL_ARRAY_BUFFER, mi.buffer_id);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, float_vec.size() * 4, float_vec.data(), GL_STATIC_DRAW);
 
+    mi.buffer_id = vbo;
     mi.vertices = float_vec.size() / 3;
+
+    //std::cout << mi << std::endl;
 
     return mi;
 
@@ -236,9 +255,21 @@ auto ModelParser::loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelI
     glGenBuffers(1, &mi.buffer_id);
     glBindBuffer(GL_ARRAY_BUFFER, mi.buffer_id);
     glBufferData(GL_ARRAY_BUFFER, v.size() * 4, v.data(), GL_STATIC_DRAW);
-
     mi.vertices = v.size() / 3;
+
     return mi;
+}
+
+void ModelParser::loadModelList(std::vector<ModelImportInfo> miov) {
+
+    for(auto& mio : miov) {
+        ModelParser mp(mio.filename);
+        auto mi = mp.loadExportedModelIntoRuntime(mio.modelname);
+        
+        mio.mi_ptr->buffer_id = mi.buffer_id;
+        mio.mi_ptr->vertices  = mi.vertices;
+    }
+
 }
 
 auto ModelParser::getModelData(const std::string& modelname) -> 

@@ -15,7 +15,7 @@ const int TEXTURE_CUSTOM_TXT = 0;
 
 class Texture {
 private:
-    GLuint texture_unit; // always GL_TEXTURE0 + some constant
+    GLuint texture_unit_id; // always GL_TEXTURE0 + some constant
     GLuint texture_id;
 
 public:
@@ -84,9 +84,9 @@ private:
             for(int i = 0; i < elements; i++) {
                 int r, g, b;
                 is >> r >> g >> b;
-                this->image_data.push_back(r & 0xFF);
-                this->image_data.push_back(g & 0xFF);
-                this->image_data.push_back(b & 0xFF);
+                image_data.push_back(r & 0xFF);
+                image_data.push_back(g & 0xFF);
+                image_data.push_back(b & 0xFF);
             }
         }
     
@@ -111,14 +111,10 @@ private:
             0,             // border width, MUST BE ZERO
             GL_RGB,        // format, MUST MATCH INTERNAL FORMAT
             GL_UNSIGNED_BYTE,       // data type
-            this->image_data.data() // pointer to image data
+            image_data.data() // pointer to image data
         );
 
         glGenerateMipmap(GL_TEXTURE_2D);
-
-        // now that opengl owns the data, we can remove it from our local storage
-        this->image_data.clear();
-        this->image_data.shrink_to_fit();
         this->texture_unit_id = texture_unit_id;
     }
 

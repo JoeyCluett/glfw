@@ -282,10 +282,10 @@ int main(int argc, char* argv[]) {
     
     auto mvp = Projection * View * Model;
 
-    auto mvp_index      = mvpshader.registerUniform("MVP",   mvp);
-    auto instance_index = mvpshader.registerUniform("instance_tf", instance_tf);
-    auto grid_mvp_index = gridshader.registerUniform("MVP",  mvp);
-    auto mvp_tex        = texshader.registerUniform("MVP",   mvp);
+    auto mvp_index      = mvpshader.registerUniform(  "MVP",   mvp);
+    auto instance_index = mvpshader.registerUniform(  "instance_tf", instance_tf);
+    auto grid_mvp_index = gridshader.registerUniform( "MVP",  mvp);
+    auto mvp_tex        = texshader.registerUniform(  "MVP",   mvp);
     auto blackshadermvp = blackshader.registerUniform("MVP", mvp);
     auto blackshaderins = blackshader.registerUniform("instance_tf", instance_tf);
 
@@ -340,8 +340,7 @@ int main(int argc, char* argv[]) {
             auto dir = camera.getDirection();
 
 
-            GLfloat t = -camera.getPosition().y / camera.getDirection().y;
-
+            GLfloat t = -pos.y / dir.y;
 
             projected_unit.x = pos.x + t*dir.x;
             projected_unit.y = 0;
