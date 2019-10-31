@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "./Shader.h"
+
 const int TEXTURE_CUSTOM_TXT = 0;
 
 class Texture {
@@ -124,8 +126,8 @@ public:
             const std::string& filename, 
             const int filetype, 
             GLuint texture_unit_id, 
-            GLuint texture_wrap, 
-            GLuint texture_minmag) {
+            GLint texture_wrap, 
+            GLint texture_minmag) {
 
         if(filetype == TEXTURE_CUSTOM_TXT) {
             this->loadCustomTextureType(filename, texture_unit_id, texture_wrap, texture_minmag);
@@ -145,9 +147,29 @@ public:
 
         this->height = height;
         this->width  = width;
+        this->texture_unit_id = texture_unit;
 
+        glGenTextures(1, &this->texture_id);
+        glBindTexture(GL_TEXTURE_2D, this->texture_id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_minmag);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_minmag);
 
+        // give this data to OpenGL
+        glTexImage2D(
+            GL_TEXTURE_2D, // texture type
+            0,             // base image level - no mipmapping
+            GL_RGB,        // internal format of the texture
+            this->width,   // width of the image
+            this->height,  // height of the image
+            0,             // border width, MUST BE ZERO
+            GL_RGB,        // format, MUST MATCH INTERNAL FORMAT
+            GL_UNSIGNED_BYTE,       // data type
+            texture_data.data() // pointer to image data
+        );
 
+        glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     GLuint getTextureUnit(void) {
@@ -158,9 +180,10 @@ public:
         return this->texture_id;
     }
 
-    void use(void) {
+    void use(Shader& s, const char* sampler) {
         glActiveTexture(this->texture_unit_id);
         glBindTexture(GL_TEXTURE_2D, this->texture_id);
+        glUniform1i(glGetUniformLocation(s.getShaderId(), sampler), this->texture_id - GL_TEXTURE0);
     }
 
 };

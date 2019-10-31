@@ -18,6 +18,7 @@ static GLuint CREATE_SHADER(GLuint shader_type, std::string filename);
 static GLuint LINK_SHADERS(GLuint vertex_shader, GLuint fragment_shader, GLint delete_shaders);
 
 static const int UNIFORM_MAT4FV = 0;
+static const int UNIFORM_VEC3F  = 1;
 
 class Shader {
 private:
@@ -89,30 +90,26 @@ public:
         return this->uniform_list.size() - 1;
     }
 
+    int registerUniform(const char* uniformname, glm::vec3& v3) {
+
+        glUseProgram(this->programid);
+        auto vecid = glGetUniformLocation(this->programid, uniformname);
+
+        this->uniform_list.push_back({
+            vecid,
+            UNIFORM_VEC3F,
+            reinterpret_cast<void*>(&v3)
+        });
+
+        return this->uniform_list.size() - 1;
+    }
+
     GLuint getShaderId(void) {
         return this->programid;
     }
 
     void updateUniformData(int index, void* data) {
         this->uniform_list[index].data = data;
-    }
-
-    GLuint useTexture(const std::string& uniform_location, Texture& tex) {
-        glUseProgram(this->programid);
-        GLuint texture_unit_id = tex.getTextureUnit();
-        tex.use();
-
-        auto id = glGetUniformLocation(
-            this->programid, 
-            uniform_location.c_str()
-        );
-
-        glUniform1i(
-            id, 
-            texture_unit_id - GL_TEXTURE0
-        );
-
-        return id;
     }
 
     void use(void) { 

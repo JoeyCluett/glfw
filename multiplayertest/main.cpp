@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../lib/Initialization.h"
+#include "../lib/Texture.h"
 #include "../lib/Shader.h"
 #include "../lib/SimpleModel.h"
 #include "../lib/FloatCam.h"
@@ -17,12 +18,10 @@ using namespace std;
 
 bool wireframe = false;
 
-const int WIDTH  = 800;
-const int HEIGHT = 600;
-
-const int GRIDHEIGHT = 50;
-const int GRIDWIDTH  = 50;
-
+const int WIDTH         = 800;
+const int HEIGHT        = 600;
+const int GRIDHEIGHT    = 50;
+const int GRIDWIDTH     = 50;
 const int TEXTUREHEIGHT = 32;
 const int TEXTUREWIDTH  = 32;
 
@@ -126,6 +125,8 @@ int main(int argc, char* argv[]) {
         texture_data.insert(texture_data.end(), { browns[ind+0], browns[ind+1], browns[ind+2] });
     }
 
+    Texture textureobj(texture_data, TEXTUREHEIGHT, TEXTUREWIDTH, GL_TEXTURE0+0, GL_REPEAT, GL_LINEAR);
+
     // triangles that texture will be on top of
     vector<GLfloat> texture_triangles = {
         0.0f, 0.0f, 0.0f,
@@ -216,7 +217,6 @@ int main(int argc, char* argv[]) {
     Shader::setVertexShaderDirectory("../assets/shaders/");
     Shader::setFragmentShaderDirectory("../assets/shaders/");
 
-    //Shader mvpshader(   "instancedvertex",     "instancedfragment");
     Shader mvpshader( "instance" );
     Shader blackshader( "blackinstancevertex", "blackinstancefragment");
     Shader gridshader(  "linegridvertex",      "linegridfragment");
@@ -243,12 +243,12 @@ int main(int argc, char* argv[]) {
     
     auto mvp = Projection * View * Model;
 
-    auto mvp_index      = mvpshader.registerUniform(  "MVP",   mvp);
-    auto instance_index = mvpshader.registerUniform(  "instance_tf", instance_tf);
-    auto grid_mvp_index = gridshader.registerUniform( "MVP",  mvp);
-    auto mvp_tex        = texshader.registerUniform(  "MVP",   mvp);
-    auto blackshadermvp = blackshader.registerUniform("MVP", mvp);
-    auto blackshaderins = blackshader.registerUniform("instance_tf", instance_tf);
+    auto mvp_index      = mvpshader.registerUniform(   "MVP",   mvp);
+    auto instance_index = mvpshader.registerUniform(   "instance_tf", instance_tf);
+    auto grid_mvp_index = gridshader.registerUniform(  "MVP",  mvp);
+    auto mvp_tex        = texshader.registerUniform(   "MVP",   mvp);
+    auto blackshadermvp = blackshader.registerUniform( "MVP", mvp);
+    auto blackshaderins = blackshader.registerUniform( "instance_tf", instance_tf);
 
     vector<glm::vec3> tf_vector;
     for(int i = 0; i < GRIDWIDTH; i++) {
@@ -439,9 +439,11 @@ int main(int argc, char* argv[]) {
             texshader.updateUniformData(mvp_tex, reinterpret_cast<void*>(&new_mvp[0][0]));
             texshader.use();
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture_id);
-            glUniform1i(glGetUniformLocation(texshader.getShaderId(), "texture_sampler"), 0);
+            //glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL_TEXTURE_2D, texture_id);
+            //glUniform1i(glGetUniformLocation(texshader.getShaderId(), "texture_sampler"), 0);
+
+
 
             // prepare vertex position data
             glEnableVertexAttribArray(0); // 1st attribute buffer : vertices
