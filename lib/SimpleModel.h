@@ -55,7 +55,7 @@ public:
 
     static void setFileLocation(std::string loc);
     static auto calculateNormals(std::vector<float>& v) -> std::vector<float>;
-    static auto loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelInfo;
+    static auto loadForeignModelIntoRuntime(std::vector<GLfloat>& v, int render_mode = GL_TRIANGLES) -> ModelInfo;
     static void loadModelList(std::vector<ModelImportInfo> miov);
 
     // constructor user will use. other constructor is used internally 
@@ -249,13 +249,19 @@ auto ModelParser::loadExportedModelIntoRuntime(const std::string& modelname) -> 
 
 }
 
-auto ModelParser::loadForeignModelIntoRuntime(std::vector<GLfloat>& v) -> ModelInfo {
+auto ModelParser::loadForeignModelIntoRuntime(std::vector<GLfloat>& v, int render_mode) -> ModelInfo {
 
     ModelInfo mi;
     glGenBuffers(1, &mi.buffer_id);
     glBindBuffer(GL_ARRAY_BUFFER, mi.buffer_id);
     glBufferData(GL_ARRAY_BUFFER, v.size() * 4, v.data(), GL_STATIC_DRAW);
-    mi.vertices = v.size() / 3;
+
+    if(render_mode == GL_TRIANGLES)
+        mi.vertices = v.size() / 3;
+    else if(render_mode == GL_LINES)
+        mi.vertices = v.size() / 2;
+    else
+        throw std::runtime_error("ModelParser::loadForeignModelIntoRuntime invalid render mode");
 
     return mi;
 }

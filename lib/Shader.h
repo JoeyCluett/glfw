@@ -124,6 +124,12 @@ public:
                             GL_FALSE, 
                             reinterpret_cast<float*>(u.data));
                     break;
+                case UNIFORM_VEC3F:
+                    glUniform3fv(
+                            u.id, 
+                            1, 
+                            reinterpret_cast<float*>(u.data));
+                    break;
                 default:
                     throw std::runtime_error("Unknown uniform type encountered in Shader.use()");
             }
