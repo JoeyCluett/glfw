@@ -11,6 +11,6 @@ uniform sampler2D texture_sampler;
 
 void main(){
 
-    color = texture( texture_sampler, UV ).rgb;
+    color = texture( texture_sampler, UV ).rgb * 0.4;
 
 }

@@ -28,6 +28,12 @@ const int GRIDWIDTH     = 50;
 const int TEXTUREHEIGHT = 32;
 const int TEXTUREWIDTH  = 32;
 
+struct {
+
+    bool space_pressed = false;
+
+} keyboard_events;
+
 int main(int argc, char* argv[]) {
 
     cout << "Creating window...\n" << flush;
@@ -48,10 +54,13 @@ int main(int argc, char* argv[]) {
             else if(key == GLFW_KEY_Q && action == GLFW_PRESS)
                 wireframe = (wireframe ? false : true);
 
+            else if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+                keyboard_events.space_pressed = true;
+
         }
     );
 
-    glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+    glClearColor(0.35f, 0.35f, 0.35f, 0.0f);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
 
@@ -171,39 +180,35 @@ int main(int argc, char* argv[]) {
         models.ground_pos = SimpleModelParser::loadForeignModelIntoRuntime(texture_triangles);
     }
 
-    vector<GLfloat> texture_coords = {
-        0.0f,      0.0f,
-        0.0f,      GRIDHEIGHT,
-        GRIDWIDTH, 0.0f, //1.0f, 0.0f,
+    // uv coordinates that describe where the texture will be applied to the triangles
+    {
+        vector<GLfloat> texture_coords = {
+            0.0f,      0.0f,
+            0.0f,      GRIDHEIGHT,
+            GRIDWIDTH, 0.0f, //1.0f, 0.0f,
 
-        GRIDWIDTH, 0.0f,
-        GRIDWIDTH, GRIDHEIGHT,
-        0.0f,      GRIDHEIGHT
-    };
+            GRIDWIDTH, 0.0f,
+            GRIDWIDTH, GRIDHEIGHT,
+            0.0f,      GRIDHEIGHT
+        };
 
-    //GLuint uv_buffer_id;
-    //glGenBuffers(1, &uv_buffer_id);
-    //glBindBuffer(GL_ARRAY_BUFFER, uv_buffer_id);
-    //glBufferData(GL_ARRAY_BUFFER, texture_coords.size() * 4, texture_coords.data(), GL_STATIC_DRAW);
+        models.ground_uv = SimpleModelParser::loadForeignModelIntoRuntime(texture_coords);
+    }
 
-    models.ground_uv = SimpleModelParser::loadForeignModelIntoRuntime(texture_coords);
+    // reticle that is displayed onscreen
+    {
+        vector<GLfloat> reticle_data = {
+            -1.0, 0.0f, -1.0f,
+            1.0, 0.0f, -1.0f,
+            0.0f, 1.0f, -1.0f,
+            0.0f, -1.0f, -1.0f
+        };
 
-    vector<GLfloat> reticle_data = {
-        -1.0, 0.0f, -1.0f,
-        1.0, 0.0f, -1.0f,
-        0.0f, 1.0f, -1.0f,
-        0.0f, -1.0f, -1.0f
-    };
+        for(auto& f : reticle_data)
+            f /= 15.0f;
 
-    for(auto& f : reticle_data)
-        f /= 15.0f;
-
-    GLuint ret_vertex_id;
-    glGenBuffers(1, &ret_vertex_id);
-    glBindBuffer(GL_ARRAY_BUFFER, ret_vertex_id);
-    glBufferData(GL_ARRAY_BUFFER, reticle_data.size() * 4, reticle_data.data(), GL_STATIC_DRAW);
-
-    models.reticle = SimpleModelParser::loadForeignModelIntoRuntime(reticle_data);
+        models.reticle = SimpleModelParser::loadForeignModelIntoRuntime(reticle_data);
+    }
 
     GLuint selector_vertex_id;
     glGenBuffers(1, &selector_vertex_id);
@@ -232,14 +237,14 @@ int main(int argc, char* argv[]) {
     Shader::setFragmentShaderDirectory("../assets/shaders/fragment/");
 
     Shader mvpshader( "instance" );
+    Shader texshader( "landtexture" );
+    Shader gridshader( "grid" );
 
     // create the shader programs used here
     Shader::setVertexShaderDirectory("../assets/shaders/compat/");
     Shader::setFragmentShaderDirectory("../assets/shaders/compat/");
 
     Shader blackshader( "blackinstancevertex", "blackinstancefragment");
-    Shader gridshader(  "linegridvertex",      "linegridfragment");
-    Shader texshader(   "texturevertex",       "texturefragment");
     Shader notfshader(  "notfvertex",          "notffragment");
 
     glm::mat4 Model = glm::mat4(1.0f);
@@ -261,43 +266,18 @@ int main(int argc, char* argv[]) {
         glm::translate(glm::vec3{ 0.0f, 0.0f, 0.0f });
     
     auto mvp = Projection * View * Model;
+    glm::vec3 dummy_color;
 
     auto mvp_index      = mvpshader.registerUniform(   "MVP",   mvp);
     auto instance_index = mvpshader.registerUniform(   "instance_tf", instance_tf);
+    auto color_index    = mvpshader.registerUniform(   "input_color", dummy_color);
+
     auto grid_mvp_index = gridshader.registerUniform(  "MVP",  mvp);
+    
     auto mvp_tex        = texshader.registerUniform(   "MVP",   mvp);
+    
     auto blackshadermvp = blackshader.registerUniform( "MVP", mvp);
     auto blackshaderins = blackshader.registerUniform( "instance_tf", instance_tf);
-
-    vector<glm::vec3> tf_vector;
-    for(int i = 0; i < GRIDWIDTH; i++) {
-        for(int j = 0; j < 20; j++) {
-
-            if((j+i) % 2 && j > 4 && j < 7)
-                tf_vector.push_back({ i, 0.0f, j });
-
-        }
-    }
-
-    vector<glm::vec3> tf_vector_truck;
-    for(int i = 0; i < GRIDWIDTH; i++) {
-        for(int j = 0; j < 20; j++) {
-
-            if((j == 4 || j == 3) && !((i+j+1)%2))
-                tf_vector_truck.push_back({ i, 0.0f, j });
-
-        }
-    }
-
-    vector<glm::vec3> tf_vector_tower;
-    for(int i = 0; i < GRIDWIDTH; i++) {
-        for(int j = 0; j < 20; j++) {
-
-            if(j == 0 && i%2)
-                tf_vector_tower.push_back({ i, 0.0f, j });
-
-        }
-    }
 
     // entity type IDs
     const int MINE_FRIENDLY   = 0;
@@ -308,7 +288,7 @@ int main(int argc, char* argv[]) {
     const int CANNON_ENEMY    = 5;
 
     struct {
-
+    private:
         // track the location of every entity on the map
         map<pair<int, int>, const int> board_map;
 
@@ -323,22 +303,43 @@ int main(int argc, char* argv[]) {
             }
         }
 
+    public:
+
+        // every model needs a transform and a color
+        struct ModelDescription {
+            glm::mat4 tf;
+            glm::vec3 c;
+        };
+
+        vector<ModelDescription> instance_info_mine;
+        vector<ModelDescription> instance_info_truck;
+        vector<ModelDescription> instance_info_cannon;
+
+        GLuint instance_size_id_mine;
+        GLuint instance_size_id_truck;
+        GLuint instance_size_id_cannon;
+
         // place pieces on the board
         void init(void) {
+
+            int k = 0;
 
             for(const int i : { 
                     MINE_FRIENDLY,   MINE_ENEMY, 
                     TRUCK_FRIENDLY,  TRUCK_ENEMY, 
                     CANNON_FRIENDLY, CANNON_ENEMY }) {
 
-                for(int j = 0; j < 30;) {
-                    int x = rand() % GRIDWIDTH;
-                    int y = rand() % GRIDHEIGHT;
+                for(int j = 0; j < 10;) {
+                    //int x = rand() % GRIDWIDTH;
+                    //int y = rand() % GRIDHEIGHT;
 
-                    if(this->placeUnit(x, y, i))
-                        j++;
+                    //if(this->placeUnit(x, y, i))
+                    //    j++;
 
+                    this->placeUnit(j, k, i);
+                    j++;
                 }
+                k++;
 
             }
         }
@@ -359,17 +360,37 @@ int main(int argc, char* argv[]) {
 
         // clear out all of the previous transforms
         void reset(void) {
-            this->friendly.mine.clear();
-            this->friendly.truck.clear();
-            this->friendly.cannon.clear();
 
-            this->enemy.mine.clear();
-            this->enemy.truck.clear();
-            this->enemy.cannon.clear();
+            //this->instance_info_truck.clear();
+
+            // shortcut way of 'clearing' the vectors holding the calculated transforms
+            // avoids calling any destructors
+            for(auto* vptr : { 
+                    &friendly.mine, &friendly.truck, &friendly.cannon, 
+                    &enemy.mine,    &enemy.truck,    &enemy.cannon }) {
+
+                auto optr = reinterpret_cast<glm::mat4**>(vptr);
+                optr[1] = optr[0];
+            }
+
         }
 
         void recalculate_model_transforms(void) {
             this->reset();
+
+            /*
+            for(auto p : this->board_map) {
+                switch(p.second) {
+                    case TRUCK_FRIENDLY:
+
+                        break;
+                    case TRUCK_ENEMY:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            */
 
             for(auto p : this->board_map) {
                 switch(p.second) {
@@ -386,29 +407,30 @@ int main(int argc, char* argv[]) {
                     case CANNON_FRIENDLY:
                         this->friendly.cannon.push_back(
                             glm::translate(
-                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second })
-                            * glm::rotate((float)M_PI, glm::vec3{0.0f, 1.0f, 0.0f}));
+                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second }));
                         break;
                     case MINE_ENEMY:
                         this->enemy.mine.push_back(
                             glm::translate(
-                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second }));
+                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second })
+                                * glm::rotate((float)M_PI, glm::vec3{0.0f, 1.0f, 0.0f}));
                         break;
                     case TRUCK_ENEMY:
                         this->enemy.truck.push_back(
                             glm::translate(
-                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second }));
+                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second })
+                                * glm::rotate((float)M_PI, glm::vec3{0.0f, 1.0f, 0.0f}));
                         break;
                     case CANNON_ENEMY:
                         this->enemy.cannon.push_back(
                             glm::translate(
-                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second }));
+                                glm::vec3{ (float)p.first.first, 0.0f, (float)p.first.second })
+                                * glm::rotate((float)M_PI, glm::vec3{0.0f, 1.0f, 0.0f}));
                         break;
                     default:
                         throw runtime_error("model_locs.recalculate_model_transforms");
                 }
             }
-
         }
 
     } model_locs;
@@ -446,19 +468,28 @@ int main(int argc, char* argv[]) {
         auto& pu = projected_unit;
         projected_unit = { round(pu.x), pu.y, round(pu.z) };
 
+        if(keyboard_events.space_pressed) {
+            camera.setPosition({ pu.x, camera.getPosition().y, pu.z });
+            keyboard_events.space_pressed = false;
+        }
+
         if(pu.x < 0 || pu.x >= GRIDWIDTH || pu.z < 0 || pu.z >= GRIDHEIGHT) {
             pu = { 10, -3, 10 };
         }
 
         model_locs.recalculate_model_transforms();
 
-        // display all of the models, all shades of red (instancedvertex.glsl)
+        glm::vec3 friendly_color( 0.0f, 0.0f, 1.0f);
+        glm::vec3 enemy_color(    0.0f, 1.0f, 0.0f);
+
+        // display all of the models on the field
         {
             
             mvpshader.use();
             mvpshader.updateUniformData(mvp_index, reinterpret_cast<void*>(&new_mvp[0][0]));
 
             glBindBuffer(GL_ARRAY_BUFFER, models.mine.buffer_id);
+            mvpshader.updateUniformData(color_index, (void*)&friendly_color);
             for(auto& tf : model_locs.friendly.mine) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
@@ -466,7 +497,7 @@ int main(int argc, char* argv[]) {
                 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
                 glDrawArrays(GL_TRIANGLES, 0, models.mine.vertices);
             }
-
+            mvpshader.updateUniformData(color_index, (void*)&enemy_color);
             for(auto& tf : model_locs.enemy.mine) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
@@ -476,6 +507,7 @@ int main(int argc, char* argv[]) {
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, models.tank.buffer_id);
+            mvpshader.updateUniformData(color_index, (void*)&friendly_color);
             for(auto& tf : model_locs.friendly.truck) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
@@ -483,7 +515,7 @@ int main(int argc, char* argv[]) {
                 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
                 glDrawArrays(GL_TRIANGLES, 0, models.tank.vertices);
             }
-
+            mvpshader.updateUniformData(color_index, (void*)&enemy_color);
             for(auto& tf : model_locs.enemy.truck) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
@@ -493,6 +525,7 @@ int main(int argc, char* argv[]) {
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, models.tower.buffer_id);
+            mvpshader.updateUniformData(color_index, (void*)&friendly_color);
             for(auto& tf : model_locs.friendly.cannon) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
@@ -500,7 +533,7 @@ int main(int argc, char* argv[]) {
                 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
                 glDrawArrays(GL_TRIANGLES, 0, models.tower.vertices);
             }
-
+            mvpshader.updateUniformData(color_index, (void*)&enemy_color);
             for(auto& tf : model_locs.enemy.cannon) {
                 mvpshader.use();
                 mvpshader.updateUniformData(instance_index, (void*)glm::value_ptr(tf));
