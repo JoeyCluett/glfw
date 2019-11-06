@@ -431,6 +431,14 @@ int main(int argc, char* argv[]) {
                         throw runtime_error("model_locs.recalculate_model_transforms");
                 }
             }
+
+            this->enemy.mine.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+            this->enemy.truck.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+            this->enemy.cannon.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+            this->friendly.mine.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+            this->friendly.truck.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+            this->friendly.cannon.push_back(glm::translate(glm::vec3{ 10.0f, -4.0f, 10.0f }));
+
         }
 
     } model_locs;
