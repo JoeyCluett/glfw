@@ -39,14 +39,14 @@ int main(int argc, char* argv[]) {
     cout << "Creating window...\n" << flush;
     auto window = GLFWINITWINDOW(WIDTH, HEIGHT, "Hello World", {3, 3}, 4, true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
+
     cout << "DONE\n" << flush;
-    
+
     FloatCam camera({ 2.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
     camera.setBounds({ -1.0f, -1.0f, -1.0f }, { GRIDWIDTH, 20.0f, GRIDHEIGHT });
 
     glfwSetKeyCallback(
-        window, 
+        window,
         [](GLFWwindow* win, int key, int scancode, int action, int mods) -> void {
             if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
                 glfwSetWindowShouldClose(win, true);
@@ -71,10 +71,7 @@ int main(int argc, char* argv[]) {
     struct {
 
         // models with static data
-        ModelInfo mine;
-        ModelInfo tank;
-        ModelInfo tower;
-        ModelInfo selector;
+        ModelInfo box;
 
         // models with data that is generated at run time
         ModelInfo grid;
@@ -88,12 +85,13 @@ int main(int argc, char* argv[]) {
     SimpleModelParser::setFileLocation("../assets/models/");
 
     try {
-    
+
         SimpleModelParser::loadModelList({
-            { "mine.txt",        "toplevel.mine",     &models.mine  },
-            { "tank.txt",        "toplevel.tank",     &models.tank  },
-            { "tower.txt",       "toplevel.tower",    &models.tower },
-            { "selectorbox.txt", "toplevel.selector", &models.selector }
+            //{ "mine.txt",        "toplevel.mine",     &models.mine  },
+            //{ "tank.txt",        "toplevel.tank",     &models.tank  },
+            //{ "tower.txt",       "toplevel.tower",    &models.tower },
+            //{ "selectorbox.txt", "toplevel.selector", &models.selector }
+            { "box.txt", "box.box", &models.box }
         });
 
         // create and load the grid array data
@@ -112,7 +110,7 @@ int main(int argc, char* argv[]) {
     }
     catch(runtime_error& up) {
         glfwDestroyWindow(window);
-        glfwTerminate();        
+        glfwTerminate();
         cout << up.what() << endl << flush;
         exit(1);
     }
@@ -150,13 +148,13 @@ int main(int argc, char* argv[]) {
         }
 
         //Texture textureobj(texture_data, TEXTUREHEIGHT, TEXTUREWIDTH, GL_TEXTURE0+0, GL_REPEAT, GL_LINEAR);
-        textures.regular_ground = 
+        textures.regular_ground =
             new Texture(
-                texture_data, 
-                TEXTUREHEIGHT, 
-                TEXTUREWIDTH, 
-                GL_TEXTURE+0, 
-                GL_REPEAT, 
+                texture_data,
+                TEXTUREHEIGHT,
+                TEXTUREWIDTH,
+                GL_TEXTURE+0,
+                GL_REPEAT,
                 GL_LINEAR);
     }
 
@@ -210,28 +208,6 @@ int main(int argc, char* argv[]) {
         models.reticle = SimpleModelParser::loadForeignModelIntoRuntime(reticle_data);
     }
 
-    GLuint selector_vertex_id;
-    glGenBuffers(1, &selector_vertex_id);
-    glBindBuffer(GL_ARRAY_BUFFER, selector_vertex_id);
-    int selector_vertex_count;
-
-    // load the selector model
-    try {
-
-        SimpleModelParser smp("selectorbox.txt");
-        auto mv = smp.getExportedModelData("toplevel.selector");
-        selector_vertex_count = mv.first.size()/3;
-        glBufferData(GL_ARRAY_BUFFER, mv.first.size() * 4, mv.first.data(), GL_STATIC_DRAW);
-
-    } catch(runtime_error& up) {
-
-        glfwDestroyWindow(window);
-        glfwTerminate();
-
-        throw up; // lol
-        exit(1);
-    }
-
     // create the shader programs used here
     Shader::setVertexShaderDirectory("../assets/shaders/vertex/");
     Shader::setFragmentShaderDirectory("../assets/shaders/fragment/");
@@ -249,22 +225,22 @@ int main(int argc, char* argv[]) {
 
     glm::mat4 Model = glm::mat4(1.0f);
 
-    glm::mat4 View = 
+    glm::mat4 View =
         glm::lookAt(
             glm::vec3( 0.5, 1.0, 2.5 ),    // camera position
             glm::vec3( 0.0, 0.0, 0.0   ),  // looking at
             glm::vec3( 0.0, 1.0, 0.0   )); // 'up'
 
-    glm::mat4 Projection = 
+    glm::mat4 Projection =
         glm::perspective(
             glm::radians(66.0f), // FOV 66.0 degrees
             float(WIDTH)/float(HEIGHT),  // aspect ratio
             0.1f,                // near clipping plane
             100.0f);             // far clipping plane
 
-    glm::mat4 instance_tf = 
+    glm::mat4 instance_tf =
         glm::translate(glm::vec3{ 0.0f, 0.0f, 0.0f });
-    
+
     auto mvp = Projection * View * Model;
     glm::vec3 dummy_color;
 
@@ -273,9 +249,9 @@ int main(int argc, char* argv[]) {
     auto color_index    = mvpshader.registerUniform(   "input_color", dummy_color);
 
     auto grid_mvp_index = gridshader.registerUniform(  "MVP",  mvp);
-    
+
     auto mvp_tex        = texshader.registerUniform(   "MVP",   mvp);
-    
+
     auto blackshadermvp = blackshader.registerUniform( "MVP", mvp);
     auto blackshaderins = blackshader.registerUniform( "instance_tf", instance_tf);
 
@@ -324,9 +300,9 @@ int main(int argc, char* argv[]) {
 
             int k = 0;
 
-            for(const int i : { 
-                    MINE_FRIENDLY,   MINE_ENEMY, 
-                    TRUCK_FRIENDLY,  TRUCK_ENEMY, 
+            for(const int i : {
+                    MINE_FRIENDLY,   MINE_ENEMY,
+                    TRUCK_FRIENDLY,  TRUCK_ENEMY,
                     CANNON_FRIENDLY, CANNON_ENEMY }) {
 
                 for(int j = 0; j < 10;) {
@@ -343,7 +319,7 @@ int main(int argc, char* argv[]) {
 
             }
         }
-        
+
         // friendly unit tfs
         struct {
             vector<glm::mat4> mine;
@@ -365,8 +341,8 @@ int main(int argc, char* argv[]) {
 
             // shortcut way of 'clearing' the vectors holding the calculated transforms
             // avoids calling any destructors
-            for(auto* vptr : { 
-                    &friendly.mine, &friendly.truck, &friendly.cannon, 
+            for(auto* vptr : {
+                    &friendly.mine, &friendly.truck, &friendly.cannon,
                     &enemy.mine,    &enemy.truck,    &enemy.cannon }) {
 
                 auto optr = reinterpret_cast<glm::mat4**>(vptr);
@@ -447,9 +423,9 @@ int main(int argc, char* argv[]) {
 
     auto iter_time = glfwGetTime();
     while(
-            !glfwWindowShouldClose(window) && 
+            !glfwWindowShouldClose(window) &&
             glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
-        
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto current_time = glfwGetTime();
@@ -492,7 +468,7 @@ int main(int argc, char* argv[]) {
 
         // display all of the models on the field
         {
-            
+
             mvpshader.use();
             mvpshader.updateUniformData(mvp_index, reinterpret_cast<void*>(&new_mvp[0][0]));
 
@@ -620,7 +596,7 @@ int main(int argc, char* argv[]) {
             glBindBuffer(GL_ARRAY_BUFFER, models.ground_uv.buffer_id);
             glVertexAttribPointer(
                 1,        // attribute 1
-                2,        // size (2 floats / uv coordinate pair) 
+                2,        // size (2 floats / uv coordinate pair)
                 GL_FLOAT, // type
                 GL_FALSE, // normalized
                 0,        // stride
@@ -659,4 +635,3 @@ int main(int argc, char* argv[]) {
     glfwTerminate();
 
 }
-
