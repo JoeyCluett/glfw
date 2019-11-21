@@ -37,7 +37,15 @@ int main(int argc, char* argv[]) {
         }
     );
 
+    glClearColor(0.35f, 0.35f, 0.35f, 0.0f);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+
+
     Texture* ground_tex;
+    ModelInfo box;
+    ModelInfo ground;
+    ModelInfo ground_uv;
 
     // load the texture data
     {
@@ -49,7 +57,52 @@ int main(int argc, char* argv[]) {
             texture_data.insert(texture_data.end(), { uint8_t(c), uint8_t(c), uint8_t(c) });
         }
 
-        ground_tex = new Texture(texture_data, TEXTUREHEIGHT, TEXTUREWIDTH, GL_TEXTURE0, GL_REPEAT, GL_LINEAR);
+        ground_tex =
+            new Texture(
+                texture_data,
+                TEXTUREHEIGHT,
+                TEXTUREWIDTH,
+                GL_TEXTURE0,
+                GL_REPEAT,
+                GL_LINEAR);
+
+        vector<GLfloat> texture_triangles = {
+            0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, GRIDHEIGHT,
+            GRIDWIDTH, 0.0f, 0.0f,
+
+            GRIDWIDTH, 0.0f, 0.0f,
+            GRIDWIDTH, 0.0f, GRIDHEIGHT,
+            0.0f, 0.0f, GRIDHEIGHT
+        };
+
+        for(int i = 0; i < (int)texture_triangles.size(); i += 3) {
+            texture_triangles[i]   -= 0.5f;
+            texture_triangles[i+2] -= 0.5f;
+        }
+
+        ground = SimpleModelParser::loadForeignModelIntoRuntime(texture_triangles);
+
+        vector<GLfloat> texture_coords = {
+            0.0f,      0.0f,
+            0.0f,      GRIDHEIGHT,
+            GRIDWIDTH, 0.0f, //1.0f, 0.0f,
+
+            GRIDWIDTH, 0.0f,
+            GRIDWIDTH, GRIDHEIGHT,
+            0.0f,      GRIDHEIGHT
+        };
+
+        ground_uv = SimpleModelParser::loadForeignModelIntoRuntime(texture_coords);
+
+    }
+
+    // load the model into the environment
+    {
+        SimpleModelParser::setFileLocation("../assets/models/");
+        SimpleModelParser::loadModelList({
+            { "box.txt", "box.box", &box }
+        });
     }
 
     while(!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {

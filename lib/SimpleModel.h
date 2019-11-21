@@ -12,7 +12,7 @@
 #include <array>
 #include <fstream>
 
-// class to assist in the loading of simple 
+// class to assist in the loading of simple
 // models described with plain ASCII text
 
 typedef glm::vec3               vertex_t;
@@ -58,33 +58,33 @@ public:
     static auto loadForeignModelIntoRuntime(std::vector<GLfloat>& v, int render_mode = GL_TRIANGLES) -> ModelInfo;
     static void loadModelList(std::vector<ModelImportInfo> miov);
 
-    // constructor user will use. other constructor is used internally 
+    // constructor user will use. other constructor is used internally
     // to create other ModelParser objects when importing files
     ModelParser(std::string filename);
 
-    // this constructor should never be used by the user directly. 
-    // it exists as a way to prevent recursive inclusion when importing 
+    // this constructor should never be used by the user directly.
+    // it exists as a way to prevent recursive inclusion when importing
     // SimpleModel files
     ModelParser(std::string filename, std::map<std::string, ModelParser*>& imported_files);
 
-    // load a particular model into OpenGL. creates buffer id and counts 
+    // load a particular model into OpenGL. creates buffer id and counts
     // the number of vertices needed to draw it
     auto loadExportedModelIntoRuntime(const std::string& modelname) -> ModelInfo;
 
     // the meat of the parsing functionality
     void parse(std::string filename, std::map<std::string, ModelParser*>& imported_files);
 
-    // get data associated with exported model. returns a vector of 
+    // get data associated with exported model. returns a vector of
     // floats and the number of vertices in the model
-    auto getExportedModelData(const std::string& modelname) 
+    auto getExportedModelData(const std::string& modelname)
             -> std::pair<std::vector<float>, int>;
 
-    // get ordinary model data. returns a vector of floats and the 
+    // get ordinary model data. returns a vector of floats and the
     // number of vertices in the model
-    auto getModelData(const std::string& modelname) 
+    auto getModelData(const std::string& modelname)
             -> std::pair<std::vector<float>, int>;
 
-    // split every triangle into 3 seperate triangles. modifies the 
+    // split every triangle into 3 seperate triangles. modifies the
     // vertex array in place
     void tessellate(void);
 
@@ -118,6 +118,7 @@ ModelParser::ModelParser(std::string filename) {
     this->named_vertices.clear();
     this->named_tris.clear();
     this->m_namespace.clear();
+    SimpleModelParser::setFileLocation("../assets/models/");
 
 }
 
@@ -151,7 +152,7 @@ ModelParser::ModelParser(std::string filename, std::map<std::string, ModelParser
 void ModelParser::tessellate(void) {
 
     // iterate through every triangle
-    
+
 
 }
 
@@ -171,7 +172,7 @@ auto ModelParser::calculateNormals(std::vector<float>& v) -> std::vector<float> 
 
         //std::cout << "," << i << std::flush;
 
-        float 
+        float
             x1 = v[i+0], y1 = v[i+1], z1 = v[i+2],
             x2 = v[i+3], y2 = v[i+4], z2 = v[i+5],
             x3 = v[i+6], y3 = v[i+7], z3 = v[i+8];
@@ -196,9 +197,9 @@ auto ModelParser::calculateNormals(std::vector<float>& v) -> std::vector<float> 
     return n;
 }
 
-auto ModelParser::getExportedModelData(const std::string& modelname) -> 
+auto ModelParser::getExportedModelData(const std::string& modelname) ->
         std::pair<std::vector<float>, int> {
-    
+
     auto iter = this->exported_models.find(modelname);
     if(iter == this->exported_models.end())
         throw std::runtime_error("unable to find exported model in SimpleModel");
@@ -271,16 +272,16 @@ void ModelParser::loadModelList(std::vector<ModelImportInfo> miov) {
     for(auto& mio : miov) {
         ModelParser mp(mio.filename);
         auto mi = mp.loadExportedModelIntoRuntime(mio.modelname);
-        
+
         mio.mi_ptr->buffer_id = mi.buffer_id;
         mio.mi_ptr->vertices  = mi.vertices;
     }
 
 }
 
-auto ModelParser::getModelData(const std::string& modelname) -> 
+auto ModelParser::getModelData(const std::string& modelname) ->
         std::pair<std::vector<float>, int> {
-    
+
     auto iter = this->named_models.find(modelname);
     if(iter == this->named_models.end())
         throw std::runtime_error("unable to find named model in SimpleModel");
@@ -358,7 +359,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
         while(is >> current_token) {
 
             //std::cout << in_comment << " " << current_token << std::endl;
-            
+
             if(in_comment) {
                 if(current_token == "**>")
                     in_comment = false;
@@ -371,7 +372,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
             }
         }
     }
-    
+
     // parse
     {
         int sz = token_list.size();
@@ -421,7 +422,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
                         }
 
                         this->named_vertices.insert({
-                            str, 
+                            str,
                             {
                                 std::stof(tl.at(i+1)),
                                 std::stof(tl.at(i+2)),
@@ -439,9 +440,9 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
                     {
                         if(this->named_tris.find(str) != this->named_tris.end())
                             throw std::runtime_error("repeated named tri in ModelParser");
-                    
+
                         this->named_tris.insert({
-                            str, 
+                            str,
                             {
                                 named_vertices.at(tl.at(i+1)),
                                 named_vertices.at(tl.at(i+2)),
@@ -468,7 +469,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
 
                             if(this->named_tris.find(model_name) != this->named_tris.end()) {
                                 mv.push_back(this->named_tris.at(model_name));
-                            
+
                             }
                             else if(this->named_models.find(model_name) != this->named_models.end()) {
 
@@ -499,7 +500,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
 
                     if(this->named_models.find(tl.at(i+1)) == this->named_models.end())
                         throw std::runtime_error(
-                            "attempt to export non-existent model '" + 
+                            "attempt to export non-existent model '" +
                             tl.at(i+1) + "'");
 
                     this->m_namespace.at(str).push_back(tl[i+1]);
@@ -514,12 +515,12 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
 
                         try {
                             mp = new ModelParser(str, imported_files);
-                            
-                            //std::cout 
-                            //    << "Imported workspace:\n\n" 
+
+                            //std::cout
+                            //    << "Imported workspace:\n\n"
                             //    << mp << std::endl;
 
-                            // iterate through exported models 
+                            // iterate through exported models
                             // and add them to the current workspace
                             for(auto& v : mp->exported_models) {
 
@@ -563,7 +564,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
 
                         if(this->named_models.find(tl.at(i+1)) == this->named_models.end())
                             throw std::runtime_error(
-                                "attempt to export non-existent model '" + 
+                                "attempt to export non-existent model '" +
                                 tl.at(i+1) + "'");
 
                         auto new_name = tl.at(i+2);
@@ -584,7 +585,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
 
                     {
                         auto xlat_mat = glm::translate(
-                            glm::mat4(1.0), 
+                            glm::mat4(1.0),
                             {
                                 std::stof(tl.at(i+2)),
                                 std::stof(tl.at(i+3)),
@@ -681,7 +682,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
                     {
 
                         auto scale_mat = glm::scale(
-                            glm::mat4(1.0), 
+                            glm::mat4(1.0),
                             {
                                 std::stof(tl.at(i+2)),
                                 std::stof(tl.at(i+3)),
@@ -749,7 +750,7 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
                         }
 
                         model_t sides;
-                        
+
                         for(int i = 0; i < numpts; i++) {
                             sides.push_back({
                                 vertex_t({ pts[i].first,            0.0f, pts[i].second }),
@@ -766,13 +767,13 @@ void ModelParser::parse(std::string filename, std::map<std::string, ModelParser*
                         }
 
                         bot.insert(
-                            bot.end(), 
-                            top.begin(), 
+                            bot.end(),
+                            top.begin(),
                             top.end());
 
                         bot.insert(
-                            bot.end(), 
-                            sides.begin(), 
+                            bot.end(),
+                            sides.begin(),
                             sides.end());
 
                         this->named_models.insert({
