@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "./Shader.h"
+#include "Shader.h"
 
 const int TEXTURE_CUSTOM_TXT = 0;
 
@@ -29,13 +29,13 @@ private:
 
     // use custom txt format for describing image data
     void loadCustomTextureType(
-            const std::string& filename, 
-            GLuint texture_unit, 
-            GLuint texture_wrap, 
+            const std::string& filename,
+            GLuint texture_unit,
+            GLuint texture_wrap,
             GLuint texture_minmag) {
-        
+
         std::ifstream is(filename);
-        
+
         // remove all of the comments from the input file
         {
             std::ofstream os("/tmp/texture-file.txt");
@@ -63,7 +63,7 @@ private:
         is.close();
         is.open("/tmp/texture-file.txt");
         std::vector<uint8_t> image_data;
-        
+
         {
             int rows, columns;
 
@@ -91,18 +91,18 @@ private:
                 image_data.push_back(b & 0xFF);
             }
         }
-    
+
         // generate all of the OpenGL stuff we need for this texture
 
         glGenTextures(1, &this->texture_id);
         glBindTexture(GL_TEXTURE_2D, this->texture_id);
-        
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_minmag);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_minmag);
-        
+
         // give this data to OpenGL
         glTexImage2D(
             GL_TEXTURE_2D, // texture type
@@ -123,10 +123,10 @@ private:
 public:
 
     Texture(
-            const std::string& filename, 
-            const int filetype, 
-            GLuint texture_unit_id, 
-            GLint texture_wrap, 
+            const std::string& filename,
+            const int filetype,
+            GLuint texture_unit_id,
+            GLint texture_wrap,
             GLint texture_minmag) {
 
         if(filetype == TEXTURE_CUSTOM_TXT) {
@@ -138,11 +138,11 @@ public:
     }
 
     Texture(
-            std::vector<uint8_t>& texture_data, 
+            std::vector<uint8_t>& texture_data,
             int height,
             int width,
-            GLuint texture_unit, 
-            GLuint texture_wrap, 
+            GLuint texture_unit,
+            GLuint texture_wrap,
             GLuint texture_minmag) {
 
         this->height = height;
@@ -187,4 +187,3 @@ public:
     }
 
 };
-

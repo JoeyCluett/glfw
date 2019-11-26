@@ -99,6 +99,8 @@ public:
 // initialize static data member to current directory
 std::string ModelParser::model_loc = "./";
 
+typedef ModelParser SimpleModelParser;
+
 ModelParser::ModelParser(std::string filename) {
     this->files = new std::map<std::string, ModelParser*>;
     this->files->insert({ filename, NULL });
@@ -818,5 +820,3 @@ ModelParser::~ModelParser(void) {
             }
     }
 }
-
-typedef ModelParser SimpleModelParser;

@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Texture.h"
+//#include "Texture.h"
 
 #include <vector>
 
@@ -38,31 +38,31 @@ private:
 public:
 
     Shader(std::string vertexshader, std::string fragmentshader) {
-        this->programid = 
+        this->programid =
             LINK_SHADERS(
                 CREATE_SHADER(
-                    GL_VERTEX_SHADER, 
-                    Shader::vertex_shader_dir + vertexshader + ".glsl"), 
-                
+                    GL_VERTEX_SHADER,
+                    Shader::vertex_shader_dir + vertexshader + ".glsl"),
+
                 CREATE_SHADER(
-                    GL_FRAGMENT_SHADER, 
-                    Shader::fragment_shader_dir + fragmentshader + ".glsl"), 
-                
+                    GL_FRAGMENT_SHADER,
+                    Shader::fragment_shader_dir + fragmentshader + ".glsl"),
+
                 GL_TRUE
             );
     }
 
     Shader(std::string shadername) {
-        this->programid = 
+        this->programid =
             LINK_SHADERS(
                 CREATE_SHADER(
-                    GL_VERTEX_SHADER, 
-                    Shader::vertex_shader_dir + shadername + ".vertex.glsl"), 
-                
+                    GL_VERTEX_SHADER,
+                    Shader::vertex_shader_dir + shadername + ".vertex.glsl"),
+
                 CREATE_SHADER(
-                    GL_FRAGMENT_SHADER, 
-                    Shader::fragment_shader_dir + shadername + ".fragment.glsl"), 
-                
+                    GL_FRAGMENT_SHADER,
+                    Shader::fragment_shader_dir + shadername + ".fragment.glsl"),
+
                 GL_TRUE
             );
     }
@@ -81,10 +81,10 @@ public:
         glUseProgram(this->programid);
         auto matrixid = glGetUniformLocation(this->programid, uniformname);
 
-        this->uniform_list.push_back({ 
-            matrixid, 
-            UNIFORM_MAT4FV, 
-            reinterpret_cast<void*>(&m4[0][0]) 
+        this->uniform_list.push_back({
+            matrixid,
+            UNIFORM_MAT4FV,
+            reinterpret_cast<void*>(&m4[0][0])
         });
 
         return this->uniform_list.size() - 1;
@@ -112,22 +112,22 @@ public:
         this->uniform_list[index].data = data;
     }
 
-    void use(void) { 
-        glUseProgram(this->programid); 
+    void use(void) {
+        glUseProgram(this->programid);
 
         for(auto& u : this->uniform_list) {
             switch(u.type) {
                 case UNIFORM_MAT4FV:
                     glUniformMatrix4fv(
-                            u.id, 
-                            1, 
-                            GL_FALSE, 
+                            u.id,
+                            1,
+                            GL_FALSE,
                             reinterpret_cast<float*>(u.data));
                     break;
                 case UNIFORM_VEC3F:
                     glUniform3fv(
-                            u.id, 
-                            1, 
+                            u.id,
+                            1,
                             reinterpret_cast<float*>(u.data));
                     break;
                 default:
@@ -221,7 +221,7 @@ static GLuint CREATE_SHADER(GLuint shader_type, std::string filename) {
 
     else if(shader_type == GL_FRAGMENT_SHADER)
         return create_fragment_shader(filename);
-    
+
     else
         throw std::runtime_error("CREATESHADER : unknown shader type");
 }
@@ -258,4 +258,3 @@ static GLuint LINK_SHADERS(GLuint vertex_shader, GLuint fragment_shader, GLint d
 
     return programid;
 }
-
