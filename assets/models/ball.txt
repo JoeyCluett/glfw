@@ -1,0 +1,36 @@
+(ns) toplevel
+
+(gcirc)
+    circle
+    16
+    0.5
+
+(tfrotdx)
+    circle
+    circlea
+    90
+
+(tfrotdz)
+    circle
+    circleb
+    90
+
+(tfrotdy)
+    circlea
+    circlec
+    45
+
+(tfrotdy)
+    circlea
+    circled
+    -45
+
+
+(nm) ball 5
+    circle
+    circlea
+    circleb
+    circlec
+    circled
+
+(exm) toplevel ball

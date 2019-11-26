@@ -46,7 +46,6 @@ void evaluateTransforms(void) {
 
 void addCube(btDiscreteDynamicsWorld* dynamics_world, glm::vec3 pos, float _mass = 4.0) {
     btCollisionShape* box_shape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
-    //btCollisionShape* box_shape = new btSphereShape(0.5);
     collision_shapes.push_back(box_shape);
 
     btTransform box_tf;
@@ -64,14 +63,58 @@ void addCube(btDiscreteDynamicsWorld* dynamics_world, glm::vec3 pos, float _mass
     rigid_body_list.push_back(body);
 }
 
+struct {
+    bool _up;
+    bool _down;
+    bool _left;
+    bool _right;
+} button_state;
+
+auto key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) -> void {
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(win, true);
+
+    //else if(key == GLFW_KEY_UP || key == GLFW_KEY_W)
+    //    button_state._up = (action == GLFW_PRESS) ? true : (action == GLFW_RELEASE);
+
+    //else if((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS)
+    //    button_state._up = true;
+    //else if((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_RELEASE)
+    //        button_state._up = false;
+
+}
+
+void evaluate_keyboard_input(GLFWwindow* win) {
+
+    if(glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(win, true);
+
+    button_state._up =
+            glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS ||
+            glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS;
+
+    button_state._down =
+            glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS ||
+            glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS;
+
+    button_state._left =
+            glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS ||
+            glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS;
+
+    button_state._right =
+            glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS ||
+            glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS;
+
+}
+
 int main(int argc, char* argv[]) {
 
     cout << "Creating window...\n" << flush;
     auto window = GLFWINITWINDOW(800, 600, "Hello World", {3, 3}, 4, true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_FALSE);
     cout << "DONE\n" << flush;
-    cout << "Hello Bullet Physics\n";
-
+    cout << "Hello ReactPhysics3D\n";
 
 	btDefaultCollisionConfiguration* collisionConfiguration =
         new btDefaultCollisionConfiguration();
@@ -110,26 +153,26 @@ int main(int argc, char* argv[]) {
         dynamicsWorld->addRigidBody(body);
     }
 
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < 40; i++) {
 
         float y = 1.1*i + 0.5;
 
         //addCube(dynamicsWorld, {25.0, 0.5, 25.0}, 80.0);
 
-        addCube(dynamicsWorld, {25.0, y, 10.0 + (0.1*i)}, 80.0);
-        addCube(dynamicsWorld, {23.0, y, 10.0 + (0.1*i)}, 80.0);
-        addCube(dynamicsWorld, {21.0, y, 10.0 + (0.1*i)}, 80.0);
-        addCube(dynamicsWorld, {19.0, y, 10.0 + (0.1*i)}, 80.0);
+        addCube(dynamicsWorld, {25.0, y, 10.0 + (0.1*i)}, 0.1);
+        //addCube(dynamicsWorld, {23.0, y, 10.0 + (0.1*i)}, 80.0);
+        //addCube(dynamicsWorld, {21.0, y, 10.0 + (0.1*i)}, 80.0);
+        addCube(dynamicsWorld, {19.0, y, 10.0 + (0.1*i)}, 0.1);
 
     }
 
-    glfwSetKeyCallback(
-        window,
-        [](GLFWwindow* win, int key, int scancode, int action, int mods) -> void {
-            if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-                glfwSetWindowShouldClose(win, true);
-        }
-    );
+    button_state._up    = false;
+    button_state._down  = false;
+    button_state._left  = false;
+    button_state._right = false;
+
+    //glfwSetKeyCallback(
+    //    window, key_callback);
 
     glClearColor(0.0f, 0.0f, 0.35f, 0.0f);
     glDepthFunc(GL_LESS);
@@ -164,7 +207,8 @@ int main(int argc, char* argv[]) {
                 TEXTUREWIDTH,
                 GL_TEXTURE0,
                 GL_REPEAT,
-                GL_LINEAR);
+                GL_NEAREST);
+                //GL_LINEAR);
 
         vector<GLfloat> texture_triangles = {
             0.0f, 0.0f, 0.0f,
@@ -206,14 +250,13 @@ int main(int argc, char* argv[]) {
         SimpleModelParser::setFileLocation("../assets/models/");
         SimpleModelParser::loadModelList({
             { "box.txt", "box.box", &box }
-            //{ "ball.txt", "toplevel.ball", &box }
         });
 
         box_shader = new Shader( "instance" );
     }
 
     // a camera to look around the field
-    FloatCam camera({ 25.0, 20.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
+    FloatCam camera({ 25.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
     //camera.setBounds({ -1.0f, -1.0f, -1.0f }, { GRIDWIDTH, 20.0f, GRIDHEIGHT });
 
     glm::mat4 Model = glm::mat4(1.0f);
@@ -246,12 +289,16 @@ int main(int argc, char* argv[]) {
     // by this time, all of our assets are loaded and ready to go
     auto iter_time = glfwGetTime();
     double accumulated_time = 0.0;
-    while(!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+    while(!glfwWindowShouldClose(window) /*&& glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS*/) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto current_time = glfwGetTime();
         auto delta_time = current_time - iter_time;
-        camera.update(float(delta_time));
+        camera.update(
+            float(delta_time),
+            button_state._up, button_state._down,
+            button_state._left, button_state._right);
+        //camera.update(float(delta_time));
         auto new_mvp = Projection * camera.getTf() * Model;
         accumulated_time += delta_time;
 
@@ -321,6 +368,7 @@ int main(int argc, char* argv[]) {
         iter_time = current_time;
         glfwSwapBuffers(window);
         glfwPollEvents();
+        evaluate_keyboard_input(window);
     }
 
     glfwDestroyWindow(window);

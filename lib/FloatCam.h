@@ -40,6 +40,8 @@ public:
     // update the FloatCam
     void update(float deltaTime);
 
+    void update(float deltaTime, bool up, bool down, bool left, bool right);
+
     // set position of camera
     void setPosition(glm::vec3 pos) { this->position = pos; }
 
@@ -143,6 +145,62 @@ void FloatCam::update(float deltaTime) {
 
 }
 
+void FloatCam::update(float deltaTime, bool up, bool down, bool _left, bool _right) {
+    double xPos, yPos;
+    glfwGetCursorPos(window, &xPos, &yPos);
+    glfwSetCursorPos(window, screenW/2, screenH/2);
+
+    _horizontal_angle += mouse_speed * deltaTime * float(screenW/2 - xPos);
+    _vertical_angle   += mouse_speed * deltaTime * float(screenH/2 - yPos);
+
+    direction = glm::vec3(
+            cos(_vertical_angle) * sin(_horizontal_angle),
+            sin(_vertical_angle),
+            cos(_vertical_angle) * cos(_horizontal_angle)
+    );
+
+    glm::vec3 right(
+            sin(_horizontal_angle - M_PI/2.0f),
+            0,
+            cos(_horizontal_angle - M_PI/2.0f)
+    );
+
+    // forward
+    if(up) {
+        position += direction * deltaTime * speed;
+    }
+
+    // backward
+    if(down) {
+        position -= direction * deltaTime * speed;
+    }
+
+    // strafe right
+    if(_right) {
+        position += right * deltaTime * speed;
+    }
+
+    // strafe left
+    if(_left) {
+        position -= right * deltaTime * speed;
+    }
+
+    if(this->is_bounded) {
+
+        auto b_clamp = [](GLfloat min, GLfloat max, GLfloat input) -> GLfloat {
+            if(input < min) return min;
+            if(input > max) return max;
+            return input;
+        };
+
+        this->position.x = b_clamp(this->minbounds.x, this->maxbounds.x, this->position.x);
+        this->position.y = b_clamp(this->minbounds.y, this->maxbounds.y, this->position.y);
+        this->position.z = b_clamp(this->minbounds.z, this->maxbounds.z, this->position.z);
+
+    }
+
+}
+
 glm::mat4 FloatCam::getTf(void) {
     return glm::lookAt(
             position,
@@ -150,4 +208,3 @@ glm::mat4 FloatCam::getTf(void) {
             glm::vec3(0, 1, 0)
     );
 }
-
