@@ -118,8 +118,8 @@ btRigidBody* addCylinder(btDiscreteDynamicsWorld* dynamics_world, glm::vec3 pos,
     else if(axis == 'z')
         body->setUserPointer((void*)&z_wheel_transform_list);
 
-    body->setFriction(0.9);
-    body->setRollingFriction(0.0);
+    body->setFriction(1.0);
+    body->setRollingFriction(0.1);
     dynamics_world->addRigidBody(body);
     rigid_body_list.push_back(body);
     return body;
@@ -143,13 +143,35 @@ auto key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(win, true);
 
-    //else if(key == GLFW_KEY_UP || key == GLFW_KEY_W)
-    //    button_state._up = (action == GLFW_PRESS) ? true : (action == GLFW_RELEASE);
+    button_state._up    = key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT);
+    button_state._down  = key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT);
+    button_state._left  = key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT);
+    button_state._right = key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT);
 
-    //else if((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS)
-    //    button_state._up = true;
-    //else if((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_RELEASE)
-    //        button_state._up = false;
+    if(key == GLFW_KEY_UP) {
+        if(button_state._accel && action == GLFW_RELEASE)
+            button_state._accel = false;
+        else if(!button_state._accel && (action == GLFW_PRESS || action == GLFW_REPEAT))
+            button_state._accel = true;
+    }
+    else if(key == GLFW_KEY_DOWN) {
+        if(button_state._decel && action == GLFW_RELEASE)
+            button_state._decel = false;
+        else if(!button_state._decel && (action == GLFW_PRESS || action == GLFW_REPEAT))
+            button_state._decel = true;
+    }
+    else if(key == GLFW_KEY_LEFT) {
+        if(button_state._turn_left && action == GLFW_RELEASE)
+            button_state._turn_left = false;
+        else if(!button_state._turn_left && (action == GLFW_PRESS || action == GLFW_REPEAT))
+            button_state._turn_left = true;
+    }
+    else if(key == GLFW_KEY_RIGHT) {
+        if(button_state._turn_right && action == GLFW_RELEASE)
+            button_state._turn_right = false;
+        else if(!button_state._turn_right && (action == GLFW_PRESS || action == GLFW_REPEAT))
+            button_state._turn_right = true;
+    }
 
 }
 
@@ -158,16 +180,31 @@ void evaluate_keyboard_input(GLFWwindow* win) {
     if(glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(win, true);
 
-    button_state._up = glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS;
-    button_state._down = glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS;
-    button_state._left = glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS;
+    auto eval_bool_key = [&win](bool& b, int key) -> void {
+        int st = glfwGetKey(win, key);
+
+        if(!b && st == GLFW_PRESS) {
+            b = true;
+        }
+        else if(b && st == GLFW_RELEASE) {
+            b = false;
+        }
+    };
+
+    eval_bool_key(button_state._accel, GLFW_KEY_UP);
+    eval_bool_key(button_state._decel, GLFW_KEY_DOWN);
+    eval_bool_key(button_state._turn_left, GLFW_KEY_LEFT);
+    eval_bool_key(button_state._turn_right, GLFW_KEY_RIGHT);
+
+    button_state._up    = glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS;
+    button_state._down  = glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS;
+    button_state._left  = glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS;
     button_state._right = glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS;
 
-    button_state._accel = glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS;
-    button_state._decel = glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS;
-    button_state._turn_left = glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS;
-    button_state._turn_right = glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS;
-
+    //button_state._accel = glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS;
+    //button_state._decel = glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS;
+    //button_state._turn_left = glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS;
+    //button_state._turn_right = glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS;
 }
 
 int main(int argc, char* argv[]) {
@@ -211,7 +248,7 @@ int main(int argc, char* argv[]) {
         btDefaultMotionState* motion_state = new btDefaultMotionState(ground_tf);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(m, motion_state, ground_shape, local_inertia);
         btRigidBody* body = new btRigidBody(rbInfo);
-        body->setFriction(0.9);
+        body->setFriction(1.0);
         body->setRollingFriction(0.9);
 
         dynamicsWorld->addRigidBody(body);
@@ -239,6 +276,7 @@ int main(int argc, char* argv[]) {
     btRigidBody* rbRightWheel     = addCylinder(dynamicsWorld, { 9.0,  22.0, 12.0 }, 'x', 1.0);
     btRigidBody* rbRearLeftWheel  = addCylinder(dynamicsWorld, { 11.0, 22.0, 8.0 },  'x', 1.0);
     btRigidBody* rbRearRightWheel = addCylinder(dynamicsWorld, { 9.0,  22.0, 8.0 },  'x', 1.0);
+    rbLeftWheel->setActivationState(DISABLE_DEACTIVATION);
     auto* hinge_0 = new btHingeConstraint(
             *rbChassis, *rbLeftWheel,
             btVector3(0.0, -1.0, 2.0), btVector3(-1.0, 0.0, 0.0),
@@ -273,8 +311,8 @@ int main(int argc, char* argv[]) {
     button_state._left  = false;
     button_state._right = false;
 
-    //glfwSetKeyCallback(
-    //    window, key_callback);
+    glfwSetKeyCallback(
+        window, key_callback);
 
     glClearColor(0.0f, 0.0f, 0.35f, 0.0f);
     glDepthFunc(GL_LESS);
@@ -411,6 +449,11 @@ int main(int argc, char* argv[]) {
         accumulated_time += delta_time;
 
         float FORWARD = -12.0;
+
+        hinge_0->enableMotor(true);
+        hinge_1->enableMotor(true);
+        hinge_2->enableMotor(true);
+        hinge_3->enableMotor(true);
 
         if(button_state._accel) {
             hinge_0->enableAngularMotor(true, FORWARD, 6.0); // front left
@@ -550,7 +593,7 @@ int main(int argc, char* argv[]) {
         iter_time = current_time;
         glfwSwapBuffers(window);
         glfwPollEvents();
-        evaluate_keyboard_input(window);
+        //evaluate_keyboard_input(window);
     }
 
     glfwDestroyWindow(window);
