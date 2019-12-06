@@ -22,9 +22,37 @@ const int GRIDWIDTH     = 50;
 const int TEXTUREHEIGHT = 16;
 const int TEXTUREWIDTH  = 16;
 
+enum class STATE : int {
+    DEFAULT, PLACING_BOX
+};
+STATE global_state = STATE::DEFAULT;
+
+FloatCam* camera = NULL;
+
+// when a new object is spawned, this struct maintains info about it
+struct {
+    float distance_from_camera;
+    glm::mat4 local_transform;
+    glm::mat4 global_transform;
+} new_entity_info;
+
 auto key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) -> void {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(win, true);
+
+    switch(global_state) {
+        case STATE::DEFAULT:
+            // wait for mouse clicks
+            break;
+        case STATE::PLACING_BOX:
+            //
+            break;
+        default:
+            cerr << "Invalid internal state\n" << flush;
+            glfwDestroyWindow(win);
+            glfwTerminate();
+            exit(1);
+    }
 
 /*
     if(key == GLFW_KEY_UP) {
@@ -54,6 +82,30 @@ auto key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
 */
 }
 
+auto mouse_button_callback(GLFWwindow* win, int button, int action, int mods) -> void {
+    switch(global_state) {
+        case STATE::DEFAULT:
+            if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+                // generate fancy new transform
+                cout << "NEW STATE : placing_box\n" << flush;
+                global_state = STATE::PLACING_BOX;
+            }
+            break;
+        case STATE::PLACING_BOX:
+            if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+                // generate fancy new transform
+                cout << "NEW STATE : default\n" << flush;
+                global_state = STATE::DEFAULT;
+            }
+            break;
+        default:
+            cerr << "Invalid internal state\n" << flush;
+            glfwDestroyWindow(win);
+            glfwTerminate();
+            exit(1);
+    }
+}
+
 int main(int argc, char* argv[]) {
 
     cout << "Creating window...\n" << flush;
@@ -67,8 +119,8 @@ int main(int argc, char* argv[]) {
     //button_state._left  = false;
     //button_state._right = false;
 
-    glfwSetKeyCallback(
-        window, key_callback);
+    glfwSetKeyCallback( window, key_callback);
+    glfwSetMouseButtonCallback( window, mouse_button_callback);
 
     glClearColor(0.0f, 0.0f, 0.35f, 0.0f);
     glDepthFunc(GL_LESS);
@@ -148,8 +200,8 @@ int main(int argc, char* argv[]) {
     {
         SimpleModelParser::setFileLocation("../assets/models/");
         SimpleModelParser::loadModelList({
-            { "box.txt",   "box.box",        &box },
-            { "wheel.txt", "toplevel.wheel", &wheel },
+            { "box.txt",   "box.box",          &box },
+            { "wheel.txt", "toplevel.wheel",   &wheel },
             { "wheel.txt", "toplevel.x_wheel", &x_wheel },
             { "wheel.txt", "toplevel.z_wheel", &z_wheel },
         });
@@ -158,7 +210,7 @@ int main(int argc, char* argv[]) {
     }
 
     // a camera to look around the field
-    FloatCam camera({ 25.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
+    camera = new FloatCam({ 25.0, 2.0, 2.0 }, 6.0, WIDTH, HEIGHT, 0.07, window);
     //camera.setBounds({ -1.0f, -1.0f, -1.0f }, { GRIDWIDTH, 20.0f, GRIDHEIGHT });
 
     glm::mat4 Model = glm::mat4(1.0f);
@@ -196,8 +248,8 @@ int main(int argc, char* argv[]) {
 
         auto current_time = glfwGetTime();
         auto delta_time = current_time - iter_time;
-        camera.update(float(delta_time));
-        auto new_mvp = Projection * camera.getTf() * Model;
+        camera->update(float(delta_time));
+        auto new_mvp = Projection * camera->getTf() * Model;
 
         // render the ground texture
         {
